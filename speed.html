@@ -1,0 +1,45 @@
+
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+<title>Uncovering the Structure of the US Economy</title>
+<link rel="stylesheet" href="stylesheets/styles.css">
+<link rel="stylesheet" href="stylesheets/pygment_trac.css">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<!--[if lt IE 9]>
+<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+<script src="d3/d3.v3.js"></script>
+
+      <div class="wrapper">
+      <header>
+        <h1>Allen Tran</h1>
+        <p>
+        <img src="static/fb_prof.jpg" class="profile_pic">
+        </p>
+
+
+        <p class="view"><a href="https://github.com/allentran">View My GitHub Profile</a></p>
+
+      </header>
+      <section>
+<h1>Traffic Speeds by Zipcode</h1>
+<p>Finding a dataset of traffic speeds by zip code is a surprisingly hard thing to do.  When I was working at the Census RDC at UCLA, I had plenty of time to spare while waiting out time on the cluster so I created my own. Time + many asynchronous requests + many rotating proxy servers.</p>
+<p>The map below shows average travel speeds from all 32,000+ zip code tabulation areas.  The average travel speed was calculated as the mean speed from trips to the nearest neighbors.</p>
+<p>I found nearest neighbors via grouping zip codes by geohash.  Look up geohashing if this is unfamiliar, it'll save you from many Haversine calculations.</p>
+ <iframe width="500" height="500" scrolling="no" frameborder="no" src="https://www.google.com/fusiontables/embedviz?q=select+col11%3E%3E1+from+1jOTreUPoMYIFf7b0eszvlLHnTPJigQwzwSWERXG3&amp;viz=MAP&amp;h=false&amp;lat=33.82711840202309&amp;lng=-118.06379095556643&amp;t=1&amp;z=9&amp;l=col11%3E%3E1&amp;y=2&amp;tmplt=2&amp;hml=GEOCODABLE"></iframe>
+      </section>
+      <footer>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div> 
+
+<script>
+
+GoogleAnalyticsObject = "ga", ga = function() { ga.q.push(arguments); }, ga.q = [], ga.l = +new Date;
+ga("create", "UA-48272912-3", "ocks.org");
+ga("send", "pageview");
+
+</script>
+<script async src="//www.google-analytics.com/analytics.js"></script>
+
