@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+<title>Uncovering the Structure of the US Economy</title>
+<link rel="stylesheet" href="stylesheets/styles.css">
+<link rel="stylesheet" href="stylesheets/pygment_trac.css">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<!--[if lt IE 9]>
+<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+<style>
+
+.background {
+  fill: #eee;
+}
+
+line {
+  stroke: #fff;
+}
+
+#tooltip {
+    position: absolute;
+    width: 200px;
+    height: auto;
+    padding: 10px;
+    opacity: 0.8;
+    background-color: white;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    -webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4); 
+    -moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4); 
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4); 
+    pointer-events: none;
+}
+
+#tooltip.hidden {
+    display: none;
+}
+
+#tooltip p { 
+    margin: 0;
+    font-family: sans-serif; 
+    font-size: 12px;
+    line-height: 20px;
+}
+
+</style>
+<script src="d3/d3.v3.js"></script>
+
+      <div class="wrapper">
+       <header>
+        <h1>Allen Tran</h1>
+        <p>
+        <img src="static/fb_prof.jpg" style="width:140px;height:140px;border-radius: 25px;">
+        </p>
+
+        <p class="view">
+        <a href="static/allentran.pdf">CV</a>
+        </br>
+        <a href="https://www.linkedin.com/in/realallentran">LinkedIn</a>
+        </br>
+        <a href="https://github.com/allentran">GitHub</a>
+        </p>
+
+      </header> 
+      <section style="width: 600px">
+<h1>The US Economy via the Production Graph</h1>
+<p><i>Dec 21, 2014</i></p>
+<p>
+At its heart, any economy is a massive network of agents, often formed into groups known as firms, who interact with each other.  A firm buys from one group of firms, sells to others (the group of consumers forming another firm if need be) in a massive convoluted way. 
+</p>
+<p>
+To make sense of it all, government agencies like the US Census Bureau define a standard bunch of industries (e.g NAICS, SIC), grouping establishments by primary business activity, so that analysis can be performed at the industry level.  Although aggregation makes for easier analysis, (1) sometimes these aggregate industries make no sense and more importantly (2) the links between firms that are the building blocks of the economy are lost.  Maintaining information from these links is important as one often needs to be able to trace out the impact of an event on other firms (e.g What sectors are most exposed to the Tech bubble bursting?). 
+</p>
+
+<p>
+Instead of grouping by primary business activity, here is a better approach to a that incorporates data on firm links. Represent the economy as an edge-weighted graph, with units of production as nodes and edges measuring the extent of trade between the two. Group the nodes by clusters such that you minimize <i>inter</i>-group links and maximize <i>intra</i>-group links.  How to do this?
+</p>
+<ol style="margin-bottom: 0px">
+<li>Create an adjancency matrix from the production/consumption graph (I use a combination of use and make input-output matrices from the BEA)   
+<li>Calculate the Laplacian of the graph 
+<li>Cluster on the eigenvectors corresponding to the lowest eigenvalues 
+</ol>
+<div id="tooltip" class="hidden">
+    <span id="row_value"></span>
+    <hr>
+    <span id="col_value"></span>
+    <hr>
+    <span id="value"></span>%
+</div> 
+     <figure id="grid_holder" style="margin-left: 0px"></figure>
+        <p style="text-align:center">Figure 1: Industries from clustering on production/consumption networks</p>
+<p> The results of aggregating 6-digit industries into 10 clusters are shown above with colors indicating membership of both row and column industries in a clustered sector (black cells are mismatched industries). The percentage values reflect the degree of overlap between the two industries.  A few fun things to note about the results which are shown above.
+<ul>
+    <li> There are three isolated clusters with less than 2 industries per cluster revolving around (1) space vehicles, (2) dental labs/manufacturing and (3) industrial furnace and oven manufacturing.</li>
+    <li> 3 clusters involving 3 different types of manufacturing. 
+    <li> The final two clusters are centered on services and food production/consumption respectively
+</ul>
+</section>
+
+</div> 
+<script>
+
+var margin = {top: 40, right: 0, bottom: 10, left: 40},
+    width = 700,
+    height = 700;
+
+var x = d3.scale.ordinal().rangeBands([0, width]),
+    z = d3.scale.linear().domain([0, 4]).clamp(true),
+    c = d3.scale.category10().domain(d3.range(10));
+
+var svg = d3.select("#grid_holder").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .style("margin-left", -margin.left + "px")
+  .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+d3.json("static/industries.json", function(industries) {
+  var matrix = [],
+      nodes = industries.nodes,
+      n = nodes.length;
+
+  // Compute index per node.
+  nodes.forEach(function(node, i) {
+    node.index = i;
+    node.count = 0;
+    matrix[i] = d3.range(n).map(function(j) { return {x: j, y: i, z: 0}; });
+  });
+
+  // Convert links to matrix; count character occurrences.
+  industries.links.forEach(function(link) {
+    matrix[link.source][link.target].z = 100*link.value;
+    matrix[link.target][link.source].z = 100*link.value;
+    nodes[link.source].count += 1;
+    nodes[link.target].count += 1;
+  });
+
+  // Precompute the orders.
+  var orders = {
+    name: d3.range(n).sort(function(a, b) { return d3.ascending(nodes[a].description, nodes[b].description); }),
+    group: d3.range(n).sort(function(a, b) { return nodes[b].group - nodes[a].group; })
+  };
+
+  // The default sort order.
+  x.domain(orders.name);
+
+  svg.append("rect")
+      .attr("class", "background")
+      .attr("width", width)
+      .attr("height", height);
+
+  // tool tip
+  var div = d3.select("body").append("div")   
+    .attr("class", "tooltip")               
+    .style("opacity", 0);
+
+  // retain current row and column
+  var curr_row = 1;
+  var curr_col = null;
+
+
+  var row = svg.selectAll(".row")
+      .data(matrix)
+    .enter().append("g")
+      .attr("class", "row")
+      .attr("transform", function(d, i) { return "translate(0," + x(i) + ")"; })
+      .each(row);
+
+  row.append("line")
+      .attr("x2", width);
+
+  var column = svg.selectAll(".column")
+      .data(matrix)
+    .enter().append("g")
+      .attr("class", "column")
+      .attr("transform", function(d, i) { return "translate(" + x(i) + ")rotate(-90)"; });
+
+  column.append("line")
+      .attr("x1", -width);
+  column.append("text")
+      .attr("x", 6)
+      .attr("y", x.rangeBand() / 2)
+      .attr("dy", ".32em")
+      .attr("text-anchor", "start")
+      .text(function(d, i) { return nodes[i].name; });
+
+  function row(row) {
+    var cell = d3.select(this).selectAll(".cell")
+        .data(row.filter(function(d) { return d.z; }))
+      .enter().append("rect")
+        .attr("class", "cell")
+        .attr("x", function(d) { return x(d.x); })
+        .attr("width", x.rangeBand())
+        .attr("height", x.rangeBand())
+        .style("fill-opacity", function(d) { return 500*z(d.z); })
+        .style("fill", function(d) { return nodes[d.x].group == nodes[d.y].group ? c(nodes[d.x].group) : null; })
+        .on("mouseover", mouseover)
+        .on("mouseout", mouseout);
+  }
+                                 
+  function mouseover(p) {
+    var ttip = d3.select("#tooltip")
+      .style("left", (d3.event.pageX-10) + "px")
+      .style("top", (d3.event.pageY-10) + "px");
+
+    console.log(p)
+    ttip.select("#col_value")
+      .text(nodes[p.x].description);
+    ttip.select("#row_value")
+      .text(nodes[p.y].description);
+    ttip.select("#value")
+      .text(Number(p.z).toFixed(1));
+      
+    ttip.classed("hidden", false);
+  }
+
+  function mouseout() {
+    d3.selectAll(".row text").classed("active", false);
+  }
+
+  d3.select("#order").on("change", function() {
+    clearTimeout(timeout);
+    order(this.value);
+  });
+
+  function order(value) {
+    x.domain(orders[value]);
+
+    var t = svg.transition().duration(2500);
+
+    t.selectAll(".row")
+        .delay(function(d, i) { return x(i) * 4; })
+        .attr("transform", function(d, i) { return "translate(0," + x(i) + ")"; })
+      .selectAll(".cell")
+        .delay(function(d) { return x(d.x) * 4; })
+        .attr("x", function(d) { return x(d.x); });
+
+    t.selectAll(".column")
+        .delay(function(d, i) { return x(i) * 4; })
+        .attr("transform", function(d, i) { return "translate(" + x(i) + ")rotate(-90)"; });
+  }
+
+  var timeout = setTimeout(function() {
+    order("group");
+    d3.select("#order").property("selectedIndex", 2).node().focus();
+  }, 5000);
+});
+
+</script>
+
+<script>
+
+GoogleAnalyticsObject = "ga", ga = function() { ga.q.push(arguments); }, ga.q = [], ga.l = +new Date;
+ga("create", "UA-48272912-3", "ocks.org");
+ga("send", "pageview");
+
+</script>
+<script async src="//www.google-analytics.com/analytics.js"></script>
