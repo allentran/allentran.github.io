@@ -68,19 +68,19 @@ line {
 <h1>The US Economy via the Production Graph</h1>
 <p><i>Dec 21, 2014</i></p>
 <p>
-At its heart, any economy is a massive network of agents, often formed into groups known as firms, who interact with each other.  A firm buys from one group of firms, sells to others (the group of consumers forming another firm if need be) in a massive convoluted way. 
+At its heart, any economy is a massive network of agents, often formed into groups known as firms, who interact with each other.  A firm buys from one group of firms, sells to others (think of consumers as another firm also supply labor services) in a massive convoluted way. But because we can't keep track of agents and their connections, we tend to think of the economy as sectors linearly feeding into one another. Agriculture/mining goods processed into final goods by some manufacturing sector.    
 </p>
 <p>
-To make sense of it all, government agencies like the US Census Bureau define a standard bunch of industries (e.g NAICS, SIC), grouping establishments by primary business activity, so that analysis can be performed at the industry level.  Although aggregation makes for easier analysis, (1) sometimes these aggregate industries make no sense and more importantly (2) the links between firms that are the building blocks of the economy are lost.  Maintaining information from these links is important as one often needs to be able to trace out the impact of an event on other firms (e.g What sectors are most exposed to the Tech bubble bursting?). 
+In line with this, government agencies like the US Census Bureau define a standard bunch of industries (e.g NAICS, SIC), aggregating establishments by primary business activity.  Although aggregation makes for easier analysis, (1) these aggregate industries often make little sense (all services are arbitarily lumped together) and more importantly, (2) information from the links between firms are lost.  Maintaining information from these links is important as one often needs to be able to trace out the impact of an event on other firms (e.g What sectors are most exposed to the Tech bubble bursting?). 
 </p>
 
 <p>
-Instead of grouping by primary business activity, here is a better approach to a that incorporates data on firm links. Represent the economy as an edge-weighted graph, with units of production as nodes and edges measuring the extent of trade between the two. Group the nodes by clusters such that you minimize <i>inter</i>-group links and maximize <i>intra</i>-group links.  How to do this?
+Instead of grouping by primary business activity, here is a better approach that directly utilizes data on firm linkages. Represent the economy as an edge-weighted graph, with units of production as nodes and edges measuring the extent of trade between the two. Group the nodes by clusters such that you minimize <i>inter</i>-group links and maximize <i>intra</i>-group links.  In other words, spectral clustering on the production consumption graph.
 </p>
 <ol style="margin-bottom: 0px">
-<li>Create an adjancency matrix from the production/consumption graph (I use a combination of use and make input-output matrices from the BEA)   
+<li>Create a symmetric adjacency matrix from the production/consumption graph (I use a combination of use and make input-output matrices from the BEA)   
 <li>Calculate the Laplacian of the graph 
-<li>Cluster on the eigenvectors corresponding to the lowest eigenvalues 
+<li>Cluster on the eigenvectors corresponding to the lowest eigenvalues greater than the first trivial eigenvalue 
 </ol>
 <div id="tooltip" class="hidden">
     <span id="row_value"></span>
@@ -97,6 +97,8 @@ Instead of grouping by primary business activity, here is a better approach to a
     <li> 3 clusters involving 3 different types of manufacturing. 
     <li> The final two clusters are centered on services and food production/consumption respectively
 </ul>
+<p>
+The one downside of this exercise is that I had to start with 6 digit NAICS industries to begin with.  Check back and I'll have a version soon with the Commodity Flow Survey, which measures actual shipments between industries in geographic areas.  Fun times.
 </section>
 
 </div> 
