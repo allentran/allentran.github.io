@@ -1,0 +1,72 @@
+
+<!DOCTYPE html>
+<html>
+<meta charset="utf-8">
+<title>Probabilistic PCA</title>
+<link rel="stylesheet" href="stylesheets/styles.css">
+<link rel="stylesheet" href="stylesheets/pygment_trac.css">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<!--[if lt IE 9]>
+<script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+<![endif]-->
+<script src="d3/d3.v3.js"></script>
+
+      <div class="wrapper">
+      <header>
+        <h1>Allen Tran</h1>
+        <p>
+        <a href="/"><img src="static/fb_prof.jpg" class="profile_pic"></a>
+        </p>
+
+
+        <p class="view">
+        <a href="http://www.twitter.com/fakeallentran">Twitter</a>
+        </br>
+        <a href="https://www.linkedin.com/in/realallentran">LinkedIn</a>
+        </br>
+        <a href="https://github.com/allentran">GitHub</a>
+        </p>
+
+      </header>
+      <section>
+<h1>Probabilistic PCA for Forecasting</h1>
+<p><i>Feb 21, 2015</i></p>
+<p>
+Back when I was a central banker at the Reserve Bank of Australia, a common joke and uncomfortable truth was that “you only need 2 people to run the RBA.  Tony Richards and someone else to make the charts.”  Tony Richards was great at ingesting a ton of data and making forecasts that had a coherent narrative, consistent with economic theory.
+</p> 
+<figure>
+  <a href="static/cps.png"><img src="static/cps.png" alt="Chart of CPS data"></a>
+  <figcaption>Figure 1: 14,000+ series from the CPS look like noise</figcaption>
+</figure>
+<p>
+Looking back, it puzzles me that professional economists cared and still care so much about economic theory.  Economic theory is a prior that allows us to restrict our attention to a subset of the data seemingly without cost. But with modern computing power and sensible modelling choices, we should be beyond that.  Otherwise we're just restricting models to the current state of theory which is an unverifiable degree behind reality.
+</p>
+<p>We really should just dump all the data into the computer and let the computer sort it out. Of course, a model with 14,000+ variables will be guaranteed to overfit as there are more variables than time periods.  No problem, use dimension reduction.  Unfortunately, PCA doesn’t work with missing data.  Time series often start and end at different points, missing data is randomly interspersed throughout and they may or may not be seasonally adjusted.  The cheap solution of univariate interpolation or replacing NaNs with means isn't a great idea if missing data is common.  For reference, from 2007, 65 percent of data from series dating back to 1948 are missing in the CPS.</p>
+<figure>
+  <a href="static/missing.png"><img src="static/missing.png" alt="Missing data in CPS chart"></a>
+  <figcaption>Figure 2: Missing data everywhere</figcaption>
+</figure>
+<p>No problem, use a flavor of Probabilistic PCA that is robust to missing data (see <a href="http://www.jmlr.org/papers/volume11/ilin10a/ilin10a.pdf">Ilin and Raiko 2010</a>).  Rather than the vanilla one-shot SVD, PPCA uses an iterative EM procedure/fixed point algorithm.  From an initial  guess, it’ll alternatively interpolate missing data and update the components until convergence.</p>
+<p>On a side note, PPCA interpolates using information from all series, making it a multivariate interpolator.  Be careful though, fitting the model to too many components will likely lead to overfitting problems in the interpolated data.</p>
+<figure>
+  <a href="static/components.png"><img src="static/components.png" alt="Chart of Principal Components"></a>
+  <figcaption>Figure 3: These 12 components explain over 50% of the variance in the CPS</figcaption>
+</figure>
+<p>
+The Scikit-Learn version doesn't handle missing data so I rolled my own (www.github.com/allentra/pca-magic). The chart above shows 10 components from the 14,000+ monthly series in the CPS.  93 components (less than 0.6% the size of the dataset) explain over 90% of the variance in the entire dataset. It’s obvious some crazy stuff went down in 2008/9 while it also picks up seasonal factors (that vary over time unlike typical seasonal adjustment which is univariate).
+</p>
+<p>
+Hopefully you found this useful as there really is a ton of messy economic/finance data to play with.  I’ll leave it up to you to ensure a model with something like 93 factors doesn’t overfit.  I already have a "better than the RBA" model of first release GDP and CPI but I’d have to kill you.
+</p>
+      </section>
+    </div> 
+
+<script>
+
+GoogleAnalyticsObject = "ga", ga = function() { ga.q.push(arguments); }, ga.q = [], ga.l = +new Date;
+ga("create", "UA-48272912-3", "ocks.org");
+ga("send", "pageview");
+
+</script>
+<script async src="//www.google-analytics.com/analytics.js"></script>
+

@@ -10,7 +10,7 @@ body {
 .profile_pic {
   width:140px;
   height:140px;
-  border-radius: 6px;
+  border-radius: 25px;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -258,4 +258,15 @@ footer {
     font-size:12pt;
     color:#444;
   }
+}
+
+figure .image {
+    width: 100%;
+}
+
+figure {
+    text-align: center;
+    display: table;
+    max-width: 110%; /* demo; set some amount (px or %) if you can */
+    margin: 10px auto; /* not needed unless you want centered */
 }
