@@ -53,7 +53,7 @@ Looking back, it puzzles me that professional economists cared and still care so
   <figcaption>Figure 3: These 12 components explain over 50% of the variance in the CPS</figcaption>
 </figure>
 <p>
-The Scikit-Learn version doesn't handle missing data so I rolled my own (www.github.com/allentra/pca-magic). The chart above shows 10 components from the 14,000+ monthly series in the CPS.  93 components (less than 0.6% the size of the dataset) explain over 90% of the variance in the entire dataset. It’s obvious some crazy stuff went down in 2008/9 while it also picks up seasonal factors (that vary over time unlike typical seasonal adjustment which is univariate).
+The Scikit-Learn version doesn't handle missing data so I rolled my own <a href="http://www.github.com/allentran/pca-magic">here</a>. The chart above shows 10 components from the 14,000+ monthly series in the CPS.  93 components (less than 0.6% the size of the dataset) explain over 90% of the variance in the entire dataset. It’s obvious some crazy stuff went down in 2008/9 while it also picks up seasonal factors (that vary over time unlike typical seasonal adjustment which is univariate).
 </p>
 <p>
 Hopefully you found this useful as there really is a ton of messy economic/finance data to play with.  I’ll leave it up to you to ensure a model with something like 93 factors doesn’t overfit.  I already have a "better than the RBA" model of first release GDP and CPI but I’d have to kill you.
