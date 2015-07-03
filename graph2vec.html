@@ -2,7 +2,10 @@
 <!DOCTYPE html>
 <html>
 <meta charset="utf-8">
-<title>Probabilistic PCA</title>
+<title>Almost Anything2Vec</title>
+<script type="text/javascript"
+        src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
 <link rel="stylesheet" href="stylesheets/styles.css">
 <link rel="stylesheet" href="stylesheets/pygment_trac.css">
 <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
@@ -29,17 +32,30 @@
 
     </header>
     <section>
-<h1>Almost anything (well at least Nodes) 2 Vec</h1>
+<h1>Almost Anything2Vec</h1>
 <p><i>June 14, 2015</i></p>
 <p>
-Like pretty much everyone, I am obsessed with word embeddings <a href="https://code.google.com/p/word2vec/">word2vec</a> or <a href="http://nlp.stanford.edu/projects/glove/">GloVe</a>.  
+Like pretty much everyone, I'm obsessed with word embeddings <a href="https://code.google.com/p/word2vec/">word2vec</a> or <a href="http://nlp.stanford.edu/projects/glove/">GloVe</a>. Although most of machine learning in general is based on turning things into vectors, it got me thinking that we should probably be learning more fundamental representations for objects, rather than hand tuning features.  Here is my attempt at turning random things into vectors, starting with graphs.  
 </p>
 <p>
-Key to algorithms is that 1) most sources of words are sequential (the primary source of words is sentences) and 2) the words surrounding a given word are meaningful.  The ability to derive meaning from the structure of words is why word embedding models train to predict a word given the context surrounding it (or vice versa).  Moreover, this training is super successful because there is so much free labelled data.
+The key to word embedding algorithms is that there is a boatload of quasi-labelled data since 1) the primary source of words are as part of sentences and 2) the words surrounding a given word are meaningful.  The ability to derive meaning from the structure of words is why word embedding models train to predict a word given the context surrounding it (or vice versa).  Training is so successful precisely because there is so much free labelled data.
 </p>
 <p>
-In short, words are an example where meaning can be derived from structure, and most of the data is structured.  The fun part is that most data that exists in digital form is structured, where there is at least some meaning in the structure.  Words are an extreme case, maybe the best, where a
+Words are an example of an object where meaning can be derived from structure and crucially, most of the data is structured.  But the fun thing is that most objects come as part of some structure, where there is at least some meaning in the structure.  For example, people are nodes in social networks with the structure, connections between people, also meaningful.  Since this is particularly true of graphs, where the structure is readily apparent, I decided to implement a graph2vec algorithm in Theano based on GloVe.  Turns out someone already thought of this, <a href="http://arxiv.org/abs/1403.6652">DeepWalk</a>, based on word2vec instead of GloVe but no matter, I'm not in grad school anymore and Theano is fun.  
 </p>
+<figure>
+  <img src="static/patent_representations.png" alt="Chart of CPS data">
+  <figcaption>Figure 1: U.S patent vectors in 2D</figcaption>
+</figure>
+<p>
+Above are the (t-SNE'd) vector representations of U.S patents, based on patent citations between 1976-2006 (source: <a href="https://sites.google.com/site/patentdataproject/Home">NBER</a>).  I treat patent citations as a directed graph, patents as nodes and citations as edges, and train the representations to predict the inverse of the length of the path to a neighbor, capping the length of paths at 2.  I don't have any king - man = queen tricks but for what it's worth, the closest patent to PageRank was a patent assigned to Centor Software Corporation, who have a bunch of patents on search and information retrieval (I was hoping for Altavista, which does okay but is no Centor). For those of you that are interested, the code is <a href="https://github.com/allentran/graph2vec">here</a>.  
+</p>
+<p>
+Intuitively, the algorithm will learn representations such that patents with similar sets of cited or citing patents will be near each other.  Note that the clustering itself is not so innovative, since a graph database and suitable queries can do the same thing.  What is useful however, are the learned representations, which can be used directly in machine learning models, either in addition to hand tuned features or like in modern NLP, as the features themselves. For example, if you have social network data, learn some vectors for each person and train a  
+</p>
+<p>
+ \\[ \frac{1}{n^{2}} \\]
+ </p>
 </section>
 </div> 
 
