@@ -3,6 +3,14 @@
 <html>
 <meta charset="utf-8">
 <title>Towards Anything2Vec</title>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
 <script type="text/javascript"
         src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
 </script>
@@ -48,7 +56,14 @@ Words are an example of an object where meaning can be derived from structure an
   <figcaption>Figure 1: U.S patent vectors in 2D</figcaption>
 </figure>
 <p>
-Above are the (t-SNE'd) vector representations of U.S patents, based on patent citations between 1976-2006 (source: <a href="https://sites.google.com/site/patentdataproject/Home">NBER</a>).  I treat patent citations as a directed graph, patents as nodes and citations as edges, and train the representations to predict the inverse of the length of the path to a neighbor, capping the length of paths at 2.  I don't have any king - man = queen tricks but for what it's worth, the closest patent to PageRank was a patent assigned to Centor Software Corporation, who have a bunch of patents on search and information retrieval (I was hoping for Altavista, which does okay but is no Centor). For those of you that are interested, the code is <a href="https://github.com/allentran/graph2vec">here</a>.  
+Above are the (t-SNE'd) vector representations of U.S patents, based on patent citations between 1976-2006 (source: <a href="https://sites.google.com/site/patentdataproject/Home">NBER</a>).  I treat patent citations as a directed graph, patents as nodes and citations as edges, and train the representations to predict the inverse of the length of the path to a neighbor, capping the length of paths at 2.  The loss function is:
+</p>
+$$\mathbb{L} = \sum_{p} \sum_{p' \vert g(p, p') < k} w(g(p, p')) \left( x_p' \hat{x}_{p'} - \frac{1}{g(p, p')}  \right)^2 $$
+<p>
+where \( p \) is a node, $g(p, p')$ is the shortest path between two nodes, $w(p, p')$ is a weighting function and $k$ is the max distance of paths included in the estimation.
+</p>
+<p>
+I don't have any king - man = queen tricks but for what it's worth, the closest patent to PageRank was a patent assigned to Centor Software Corporation, who have a bunch of patents on search and information retrieval (I was hoping for Altavista, which does okay but is no Centor). For those of you that are interested, the code is <a href="https://github.com/allentran/graph2vec">here</a>.  
 </p>
 <p>
 Intuitively, the algorithm will learn representations such that patents with similar sets of cited or citing patents will be near each other.  Note that the clustering itself is not so innovative, since a graph database and suitable queries can do the same thing.  What is useful however, are the learned representations, which can be used directly in machine learning models, either in addition to hand tuned features or like in modern NLP, as the features themselves. For example, if you have social network data, learn vectors for each person and train a model of dating.  It'd be fun to see if it would learn gender and even sexual preferences. 
